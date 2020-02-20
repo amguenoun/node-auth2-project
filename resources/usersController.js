@@ -1,6 +1,8 @@
 const db = require('../data/dbConfig');
 const bcryptjs = require('bcryptjs');
 
+const generateToken = require('../utils/generateToken');
+
 exports.registerUser = (req, res) => {
     const credentials = req.body;
     const hash = bcryptjs.hashSync(credentials.password, 12);
@@ -18,13 +20,15 @@ exports.registerUser = (req, res) => {
 
 exports.loginUser = (req, res) => {
     const credentials = req.body;
-    console.log(credentials)
+
     db('users')
         .where('username', credentials.username)
+        .first()
         .then(user => {
-            if (user && bcryptjs.compareSync(credentials.password, user[0].password)) {
+            if (user && bcryptjs.compareSync(credentials.password, user.password)) {
                 //add token to send back here
-                res.status(200).json({ message: 'Welcome to the site' })
+                const token = generateToken(user)
+                res.status(200).json({ message: 'Welcome to the site', token: token })
             }
             else {
                 res.status(400).json({ message: 'Invalid Password' })
