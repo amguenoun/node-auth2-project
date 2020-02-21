@@ -40,7 +40,10 @@ exports.loginUser = (req, res) => {
 }
 
 exports.getAllUsers = (req, res) => {
+    const department = req.decodedToken.payload.department;
+
     db('users')
+        .where('department', department)
         .then(users => {
             res.status(200).json(users);
         })
